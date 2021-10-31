@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/zackwn/books-api/controllers"
+	"github.com/zackwn/books-api/server/middlewares"
 	"github.com/zackwn/books-api/services"
 )
 
@@ -18,6 +19,7 @@ func ConfigRoutes(router *gin.Engine) *gin.Engine {
 		}
 		books := main.Group("books")
 		{
+			books.Use(middlewares.NewRequiredAuth(jwt))
 			books.GET("/:id", controllers.ShowBook)
 			books.DELETE("/:id", controllers.DeleteBook)
 			books.POST("/create", controllers.CreateBook)
