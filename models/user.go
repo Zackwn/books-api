@@ -11,9 +11,9 @@ type User struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-	Name      string         `json:"name"`
-	Email     string         `json:"email"`
-	Password  string         `json:"password,omitempty"`
+	Name      string         `json:"name" gorm:"not null"`
+	Email     string         `json:"email" gorm:"unique;not null"`
+	Password  string         `json:"password,omitempty" gorm:"not null"`
 }
 
 func (user *User) Validate() bool {
