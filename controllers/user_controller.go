@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zackwn/books-api/database"
 	"github.com/zackwn/books-api/models"
 	"github.com/zackwn/books-api/services"
+	"gorm.io/gorm"
 )
 
 func CreateUser(c *gin.Context) {
@@ -28,6 +30,21 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	db := database.Get()
+
+	err = db.Where("email = ?", user.Email).First(&models.User{}).Error
+	if err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "email already in use",
+		})
+		return
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	user.Password, err = services.Hash(user.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -36,7 +53,6 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	db := database.Get()
 	err = db.Create(&user).Error
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
